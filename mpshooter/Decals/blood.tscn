@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://ywmyg25qgsjw"]
+
+[ext_resource type="Texture2D" uid="uid://bs0npvpcj411o" path="res://Decals/Blood.png" id="1_n1x64"]
+
+[node name="Decal" type="Decal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+layers = 2
+size = Vector3(0.25, 0.25, 0.2)
+texture_albedo = ExtResource("1_n1x64")
+distance_fade_enabled = true
+cull_mask = 1047554

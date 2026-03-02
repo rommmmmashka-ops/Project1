@@ -1,0 +1,139 @@
+[gd_scene load_steps=13 format=3 uid="uid://yyxto48m0qs6"]
+
+[ext_resource type="Script" path="res://Guns/StandartGunTemplate/gun.gd" id="1_oshky"]
+[ext_resource type="FontFile" uid="uid://ipjbi2icepk4" path="res://Intro.otf" id="2_fm0bm"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mgs7p"]
+size = Vector3(0.08, 0.2, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_33o20"]
+albedo_color = Color(0.252028, 0.252028, 0.252028, 1)
+roughness = 0.45
+
+[sub_resource type="BoxMesh" id="BoxMesh_2q2lu"]
+material = SubResource("StandardMaterial3D_33o20")
+size = Vector3(0.08, 0.1, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eku1k"]
+albedo_color = Color(0.277528, 0.277528, 0.277528, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j7dou"]
+material = SubResource("StandardMaterial3D_eku1k")
+size = Vector3(0.06, 0.2, 0.08)
+
+[sub_resource type="Animation" id="Animation_u3nkr"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MeshInstance3D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_g1522"]
+resource_name = "Reload"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4, 1.8, 2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(-0.523599, 0, 0), Vector3(-0.523599, 0, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_p5i31"]
+resource_name = "Shoot"
+length = 0.2
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0.261799, 0, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_a58p2"]
+_data = {
+"RESET": SubResource("Animation_u3nkr"),
+"Reload": SubResource("Animation_g1522"),
+"Shoot": SubResource("Animation_p5i31")
+}
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_cq0nb"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="Gun" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_oshky")
+itemName = "Gun"
+path = "res://Guns/StandartGunTemplate/gun.tscn"
+isOneUsage = false
+minDmg = 15
+maxDmg = 20
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+shape = SubResource("BoxShape3D_mgs7p")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_2q2lu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, -0.07, 0.1)
+mesh = SubResource("BoxMesh_j7dou")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+target_position = Vector3(0, 0, -20)
+collision_mask = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_a58p2")
+}
+
+[node name="Label" type="Label" parent="."]
+offset_left = 900.0
+offset_top = 540.0
+offset_right = 1008.0
+offset_bottom = 595.0
+theme_override_fonts/font = ExtResource("2_fm0bm")
+theme_override_font_sizes/font_size = 40
+text = "12/60"
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_cq0nb")

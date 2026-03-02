@@ -1,0 +1,213 @@
+[gd_scene load_steps=15 format=3 uid="uid://cryiv2n4polqc"]
+
+[ext_resource type="Script" path="res://Player/TestCharacterBody3D.gd" id="1_necku"]
+[ext_resource type="Script" path="res://Player/Hitbox.gd" id="2_734s4"]
+[ext_resource type="Script" path="res://Player/Interface.gd" id="3_8ukuv"]
+[ext_resource type="Script" path="res://Player/Inventory.gd" id="4_i56a1"]
+
+[sub_resource type="Animation" id="Animation_cdy3r"]
+resource_name = "Walking"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_gpp6i"]
+_data = {
+"Walking": SubResource("Animation_cdy3r")
+}
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_gwfsn"]
+radius = 0.25
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iylp4"]
+size = Vector3(0.3, 0.5, 0.2)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7u8mb"]
+radius = 0.25
+height = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_adx73"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_o3xj0"]
+material = SubResource("StandardMaterial3D_adx73")
+size = Vector3(0.3, 0.5, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jmh12"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_1aajm"]
+material = SubResource("StandardMaterial3D_jmh12")
+radius = 0.25
+height = 0.5
+radial_segments = 8
+rings = 8
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_opx2d"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:scale")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("Head:rotation")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_necku")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_gpp6i")
+}
+
+[node name="HeadHitbox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_734s4")
+zone = "Head"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HeadHitbox"]
+shape = SubResource("SphereShape3D_gwfsn")
+
+[node name="BodyHitbox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_734s4")
+zone = "Body"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BodyHitbox"]
+shape = SubResource("BoxShape3D_iylp4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.526263, 0)
+shape = SubResource("CapsuleShape3D_7u8mb")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+layers = 2
+mesh = SubResource("BoxMesh_o3xj0")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+layers = 2
+mesh = SubResource("SphereMesh_1aajm")
+skeleton = NodePath("../Body")
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="Hand" type="MeshInstance3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.1, -0.4)
+skeleton = NodePath("../Camera3D")
+
+[node name="RayCast3D" type="RayCast3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.26567)
+target_position = Vector3(0, 0, -50)
+collision_mask = 2
+hit_from_inside = true
+
+[node name="RayCast3D2" type="RayCast3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.26567)
+target_position = Vector3(0, 0, -50)
+collision_mask = 4
+hit_from_inside = true
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+offset_left = 60.0
+offset_top = 558.0
+offset_right = 348.0
+offset_bottom = 600.0
+step = 1.0
+script = ExtResource("3_8ukuv")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
+[node name="Control" type="ColorRect" parent="."]
+anchors_preset = -1
+anchor_right = 0.028
+anchor_bottom = 0.049
+offset_left = 496.0
+offset_top = 560.0
+offset_right = 623.744
+offset_bottom = 568.248
+color = Color(0, 0, 0, 0.596078)
+script = ExtResource("4_i56a1")
+
+[node name="TextureRect" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect2" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_left = 40.0
+offset_right = 80.0
+offset_bottom = 40.0
+
+[node name="TextureRect3" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_left = 80.0
+offset_right = 120.0
+offset_bottom = 40.0
+
+[node name="TextureRect4" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_left = 120.0
+offset_right = 160.0
+offset_bottom = 40.0
+
+[node name="Count" type="Label" parent="Control"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_top = 16.0
+offset_right = 40.0
+offset_bottom = 39.0
+horizontal_alignment = 1
+
+[node name="Count2" type="Label" parent="Control"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_left = 40.0
+offset_top = 16.0
+offset_right = 80.0
+offset_bottom = 39.0
+horizontal_alignment = 1
+
+[node name="Count3" type="Label" parent="Control"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_left = 80.0
+offset_top = 16.0
+offset_right = 120.0
+offset_bottom = 39.0
+horizontal_alignment = 1
+
+[node name="Count4" type="Label" parent="Control"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_left = 120.0
+offset_top = 16.0
+offset_right = 160.0
+offset_bottom = 39.0
+horizontal_alignment = 1
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_opx2d")

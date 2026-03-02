@@ -1,0 +1,98 @@
+[gd_scene load_steps=8 format=3 uid="uid://bluw0n2b2u2ge"]
+
+[ext_resource type="Script" path="res://Objects/Medicine/HealKIt.gd" id="1_4k6pd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jeumc"]
+albedo_color = Color(0.721569, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_16r5e"]
+material = SubResource("StandardMaterial3D_jeumc")
+size = Vector3(0.4, 0.4, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w7vkv"]
+size = Vector3(0.4, 0.4, 0.2)
+
+[sub_resource type="Animation" id="Animation_yo81u"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MeshInstance3D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MeshInstance3D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ffi76"]
+resource_name = "waiting"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MeshInstance3D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 3.14159, 0), Vector3(0, 6.28319, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MeshInstance3D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 0.2, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_7hq5v"]
+_data = {
+"RESET": SubResource("Animation_yo81u"),
+"waiting": SubResource("Animation_ffi76")
+}
+
+[node name="HealKIt" type="StaticBody3D"]
+script = ExtResource("1_4k6pd")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 30.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_16r5e")
+
+[node name="Area3D" type="Area3D" parent="MeshInstance3D"]
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/Area3D"]
+shape = SubResource("BoxShape3D_w7vkv")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_7hq5v")
+}
+speed_scale = 0.5
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="body_entered" from="MeshInstance3D/Area3D" to="." method="_on_area_3d_body_entered"]
