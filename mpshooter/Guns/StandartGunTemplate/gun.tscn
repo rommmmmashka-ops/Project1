@@ -140,10 +140,15 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 mesh = SubResource("CylinderMesh_uqo53")
 
 [node name="Label" type="Label" parent="."]
-offset_left = 900.0
-offset_top = 540.0
-offset_right = 1008.0
-offset_bottom = 595.0
+anchors_preset = -1
+anchor_left = 0.9
+anchor_top = 0.9
+anchor_right = 0.9
+anchor_bottom = 0.9
+offset_left = -108.0
+offset_top = -55.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_fonts/font = ExtResource("2_fm0bm")
 theme_override_font_sizes/font_size = 40
 text = "12/60"
