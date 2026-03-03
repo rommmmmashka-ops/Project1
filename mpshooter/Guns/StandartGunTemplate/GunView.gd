@@ -20,6 +20,7 @@ extends RigidBody3D
 @onready var ammo_label = $Label
 @onready var ray_origin = $RayCast3D
 @onready var laser = $Laser
+@onready var shot = $ShotMesh
 
 #var curAmmo := 12
 #var ammo := 60
@@ -37,12 +38,20 @@ func _ready():
 	continuous_cd = true
 	changed()
 
+func _physics_process(_delta: float):
+	if !canBeTaken and ray_origin.is_colliding():
+		var col = ray_origin.get_collision_point()
+		var distance = ray_origin.global_position.distance_to(col)
+		laser.mesh.height = distance
+		#print(laser.mesh.height)
+		laser.position.z = -distance / 2
 
 func changed():
 	#print(canBeTaken)
 	ammo_label.visible = get_parent().get_parent().is_multiplayer_authority() and !canBeTaken
 	ammo_label.text = str(properties.curAmmo) +"/"+str(properties.ammo)
 	laser.visible = !canBeTaken
+	shot.hide()
 
 @rpc("any_peer", "reliable")
 func change_props(props):
@@ -58,8 +67,11 @@ func used_client(type):
 			anim.play("Shoot")
 			sound.play()
 			changed()
+			shot.show()
+			$ShotMesh/Timer.start()
 		2:
 			anim.play("Reload")
 			changed()
 		
-	
+func _on_timer_timeout():
+	shot.hide()

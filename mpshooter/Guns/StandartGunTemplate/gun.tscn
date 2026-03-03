@@ -1,8 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://yyxto48m0qs6"]
+[gd_scene load_steps=17 format=3 uid="uid://yyxto48m0qs6"]
 
 [ext_resource type="Script" path="res://Guns/StandartGunTemplate/GunView.gd" id="1_hy2rc"]
 [ext_resource type="FontFile" uid="uid://ipjbi2icepk4" path="res://Intro.otf" id="2_fm0bm"]
 [ext_resource type="AudioStream" uid="uid://cjtcmtwyqy5wd" path="res://Sounds/Shoot1.mp3" id="2_ktdtp"]
+[ext_resource type="ArrayMesh" uid="uid://3d2mn3seknsv" path="res://Guns/Shot.obj" id="3_ovmw7"]
 
 [sub_resource type="Animation" id="Animation_u3nkr"]
 length = 0.001
@@ -101,6 +102,9 @@ height = 20.0
 radial_segments = 16
 rings = 1
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uw0f5"]
+albedo_color = Color(1, 1, 0.235294, 1)
+
 [node name="Gun" type="RigidBody3D"]
 collision_layer = 4
 collision_mask = 7
@@ -131,13 +135,31 @@ mesh = SubResource("BoxMesh_j7dou")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 target_position = Vector3(0, 0, -20)
-collision_mask = 8
-collide_with_areas = true
-collide_with_bodies = false
+collision_mask = 7
 
 [node name="Laser" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -10)
+layers = 4
 mesh = SubResource("CylinderMesh_uqo53")
+
+[node name="ShotMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.2, 0, 0, 0, -1.31134e-08, 0.2, 0, -0.3, -8.74228e-09, 0, 0, -0.18)
+layers = 4
+material_override = SubResource("StandardMaterial3D_uw0f5")
+mesh = ExtResource("3_ovmw7")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="ShotMesh"]
+transform = Transform3D(5, 0, 0, 0, 3.33333, 2.84217e-14, 0, -4.26326e-14, 5, 0, 0.415475, 2.72415e-08)
+layers = 5
+light_color = Color(1, 1, 0.176471, 1)
+light_energy = 3.0
+light_size = 0.2
+omni_range = 20.0
+omni_attenuation = 0.307784
+
+[node name="Timer" type="Timer" parent="ShotMesh"]
+wait_time = 0.05
+one_shot = true
 
 [node name="Label" type="Label" parent="."]
 anchors_preset = -1
@@ -152,3 +174,5 @@ grow_vertical = 0
 theme_override_fonts/font = ExtResource("2_fm0bm")
 theme_override_font_sizes/font_size = 40
 text = "12/60"
+
+[connection signal="timeout" from="ShotMesh/Timer" to="." method="_on_timer_timeout"]

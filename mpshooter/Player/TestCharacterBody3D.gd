@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+var platform = null
 
 # Constants
 const SPEED = 5.0
@@ -18,6 +19,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var Body = $Body
 @onready var Inv = $Control
+
 
 # Main
 var health = 49
@@ -305,7 +307,20 @@ func _ready():
 
 	if is_multiplayer_authority():
 		Body.hide()
-
+	
+	
+	platform = OS.get_name()
+	match platform:
+		"Windows", "macOS", "Linux":
+			print("Працює на десктопі: ", platform)
+		"Android", "iOS":
+			print("Працює на мобільному пристрої: ", platform)
+			platform = "mobile"
+			$Joystick.show()
+		"Web":
+			print("Працює в браузері")
+		_:
+			print("Інша платформа: ", platform)
 	#Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _enter_tree():
@@ -385,7 +400,11 @@ func _physics_process(delta):
 				shift = 1
 			else:
 				shift = 1.5
-
+		
+		if platform == "mobile":
+			velocity.x = $Joystick.direction.x * SPEED * shift
+			velocity.y = $Joystick.direction.y * SPEED * shift
+			return
 		var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 		if direction:
@@ -398,7 +417,6 @@ func _physics_process(delta):
 			velocity.z = 0
 
 	move_and_slide()
-
 
 
 
@@ -417,7 +435,7 @@ func receive_dmg_rpc(dmg, _zone, _hit):
 
 @rpc("any_peer", "call_local")
 func add_decal(hit):
-	var decal = load("res://Decals/blood.tscn").instantiate()
+	var decal = load("res://Decals & Shaders/Blood/blood.tscn").instantiate()
 	add_child(decal)
 	decal.global_position = hit.position
 	decal.global_transform.origin = hit.position
