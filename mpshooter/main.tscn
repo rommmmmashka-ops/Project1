@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://dh1n43fhhe6b"]
 
 [ext_resource type="FontFile" uid="uid://ipjbi2icepk4" path="res://Intro.otf" id="1_donqo"]
-[ext_resource type="Script" path="res://main.gd" id="1_jmxhq"]
+[ext_resource type="Script" uid="uid://c308ngpvc0fap" path="res://main.gd" id="1_jmxhq"]
 [ext_resource type="PackedScene" uid="uid://cryiv2n4polqc" path="res://Player/player.tscn" id="2_mew6u"]
 [ext_resource type="ArrayMesh" uid="uid://ck3dxaud0b7lg" path="res://Scene.obj" id="4_1kq80"]
 [ext_resource type="PackedScene" uid="uid://bluw0n2b2u2ge" path="res://Objects/Medicine/heal_k_it.tscn" id="6_1wc78"]
@@ -17,7 +17,7 @@ script = ExtResource("1_jmxhq")
 playerPacked = ExtResource("2_mew6u")
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Player/player.tscn")
+_spawnable_scenes = PackedStringArray("uid://cryiv2n4polqc")
 spawn_path = NodePath("..")
 
 [node name="MainMenu" type="CanvasLayer" parent="."]

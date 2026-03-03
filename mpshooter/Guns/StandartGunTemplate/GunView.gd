@@ -37,6 +37,14 @@ func _ready():
 	continuous_cd = true
 	changed()
 
+func _physics_process(_delta: float):
+	if !canBeTaken and ray_origin.is_colliding():
+		var col = ray_origin.get_collision_point()
+		var distance = ray_origin.global_position.distance_to(col)
+		laser.mesh.height = distance
+		print(laser.mesh.height)
+		laser.position.z = -distance / 2
+		
 
 func changed():
 	#print(canBeTaken)

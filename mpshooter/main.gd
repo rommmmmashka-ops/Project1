@@ -102,7 +102,7 @@ func sync_full_state(items_data: Dictionary):
 			child.queue_free()
 
 func _on_line_edit_text_submitted(new_text):
-	ip_adress = $MainMenu/LineEdit.new_text
+	ip_adress = new_text
 
 func _on_host_pressed():
 	peer.create_server(PORT)

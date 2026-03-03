@@ -1,6 +1,6 @@
 [gd_scene load_steps=15 format=3 uid="uid://yyxto48m0qs6"]
 
-[ext_resource type="Script" path="res://Guns/StandartGunTemplate/GunView.gd" id="1_hy2rc"]
+[ext_resource type="Script" uid="uid://ejlvq4pccgqm" path="res://Guns/StandartGunTemplate/GunView.gd" id="1_hy2rc"]
 [ext_resource type="FontFile" uid="uid://ipjbi2icepk4" path="res://Intro.otf" id="2_fm0bm"]
 [ext_resource type="AudioStream" uid="uid://cjtcmtwyqy5wd" path="res://Sounds/Shoot1.mp3" id="2_ktdtp"]
 
@@ -66,9 +66,9 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_a58p2"]
 _data = {
-"RESET": SubResource("Animation_u3nkr"),
-"Reload": SubResource("Animation_g1522"),
-"Shoot": SubResource("Animation_p5i31")
+&"RESET": SubResource("Animation_u3nkr"),
+&"Reload": SubResource("Animation_g1522"),
+&"Shoot": SubResource("Animation_p5i31")
 }
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mgs7p"]
@@ -111,7 +111,7 @@ damage = 15
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_a58p2")
+&"": SubResource("AnimationLibrary_a58p2")
 }
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
@@ -131,12 +131,10 @@ mesh = SubResource("BoxMesh_j7dou")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 target_position = Vector3(0, 0, -20)
-collision_mask = 8
-collide_with_areas = true
-collide_with_bodies = false
+collision_mask = 7
 
 [node name="Laser" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -10)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, -10)
 mesh = SubResource("CylinderMesh_uqo53")
 
 [node name="Label" type="Label" parent="."]

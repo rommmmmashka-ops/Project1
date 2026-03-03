@@ -12,7 +12,7 @@ extends RigidBody3D
 @export var isForBuilding = false
 @export var isOneUsage = true
 #Properties
-var properties = []
+var properties = {}
 
 
 
