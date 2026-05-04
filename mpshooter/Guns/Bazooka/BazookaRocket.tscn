@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://wdgyqla7clog"]
+[gd_scene load_steps=15 format=3 uid="uid://wdgyqla7clog"]
 
 [ext_resource type="ArrayMesh" uid="uid://bbmqsn1nnc2h7" path="res://Guns/Bazooka/BazookaRocket.obj" id="1_2bvge"]
 [ext_resource type="Script" path="res://Guns/Bazooka/BazookaRocket.gd" id="1_jk0of"]
@@ -57,17 +57,6 @@ material = SubResource("StandardMaterial3D_4xfru")
 radial_segments = 6
 rings = 4
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_phl77"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:rotation")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:scale")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-
 [node name="Rocket" type="RigidBody3D"]
 collision_layer = 4
 collision_mask = 3
@@ -109,9 +98,6 @@ lifetime = 0.6
 fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_phgsf")
 draw_pass_1 = SubResource("SphereMesh_w0u6k")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_phl77")
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
 [connection signal="body_entered" from="Area3D2" to="." method="_on_area_3d_2_body_entered"]

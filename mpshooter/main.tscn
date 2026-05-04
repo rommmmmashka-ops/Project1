@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dh1n43fhhe6b"]
+[gd_scene load_steps=14 format=3 uid="uid://dh1n43fhhe6b"]
 
 [ext_resource type="FontFile" uid="uid://ipjbi2icepk4" path="res://Intro.otf" id="1_donqo"]
 [ext_resource type="Script" path="res://main.gd" id="1_jmxhq"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://coj6up7i4dt24" path="res://Objects/Object/test_object.tscn" id="7_48htd"]
 [ext_resource type="PackedScene" uid="uid://yyxto48m0qs6" path="res://Guns/StandartGunTemplate/gun.tscn" id="9_6fyhd"]
 [ext_resource type="PackedScene" uid="uid://csgf3n7b651en" path="res://Objects/Bomb/bomb.tscn" id="9_m81op"]
+[ext_resource type="PackedScene" uid="uid://gf61ilir2pds" path="res://Guns/Bazooka/Bazooka.tscn" id="10_s4vcd"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rdnn4"]
 albedo_texture = ExtResource("4_8rqlt")
@@ -119,6 +120,9 @@ icon = "res://Objects/Object/Brick_icon.png"
 
 [node name="Gun" parent="." instance=ExtResource("9_6fyhd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 6)
+
+[node name="Bazooka" parent="." instance=ExtResource("10_s4vcd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, -2)
 
 [connection signal="spawned" from="MultiplayerSpawner" to="." method="_on_multiplayer_spawner_spawned"]
 [connection signal="pressed" from="MainMenu/Host" to="." method="_on_host_pressed"]

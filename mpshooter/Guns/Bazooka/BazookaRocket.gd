@@ -1,7 +1,20 @@
 extends RigidBody3D
 
 
+
+#Inventory
+@export var itemName = ""
+@export var path = ""
+@export var icon = ""
+@export var weight = 1
+@export var canBeTaken = false
+@export var isForBuilding = false
+@export var isOneUsage = true
+
 var netID: int
+
+var properties = {}
+
 
 @onready var col_1 = $Area3D/CollisionShape3D
 @onready var col_2 = $Area3D2/CollisionShape3D2
@@ -62,7 +75,7 @@ func sync_transform(transf, lVel, aVel):
 	
 func _physics_process(delta):
 	
-	if multiplayer.is_server():
+	if multiplayer.is_server() and canBeTaken:
 		rpc("sync_transform", global_transform, linear_velocity, angular_velocity)
 		
 	if active:
@@ -76,16 +89,6 @@ func _physics_process(delta):
 			#var dir = calcDir.normalized()
 			var dir = (mDir + Vector3.UP * 0.2).normalized()
 			if dir.cross(Vector3.UP).length() > 0.001:
-				#var nose_dir = -global_transform.basis.z.normalized()
-				#var ground_up = Vector3.UP
-#
-				## Вектор, який показує, наскільки ракета відхиляється від вертикалі
-				#var correction_axis = nose_dir.cross(ground_up).normalized()
-				#var correction_strength = nose_dir.angle_to(ground_up)
-				#print(correction_axis, correction_strength)
-#
-				## Застосовуємо момент, щоб вирівняти ракету
-				#apply_torque(correction_axis * correction_strength * 1.0)
 				look_at(global_transform.origin + dir, Vector3.UP)
 			#print(self.global_rotation_degrees)
 			
