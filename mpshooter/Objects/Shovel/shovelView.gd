@@ -1,36 +1,16 @@
 extends RigidBody3D
 
 
-@onready var Anim = $AnimationPlayer
 
-#Inventory
-@export var itemName = ""
-@export var path = ""
-@export var icon = ""
-@export var weight = 1
-@export var canBeTaken = true
-@export var isForBuilding = false
-@export var isOneUsage = true
 
 var netID: int
-#Properties
-var properties = {}
-
-
-
-func change_props(_props):
-	pass
-
+# Called when the node enters the scene tree for the first time.
 func _ready():
 	continuous_cd = true
 	if multiplayer.is_server():
 		if !netID:
 			netID = $/root/Main.generate_id()
 			$/root/Main.register_existing_item(self)
-
-func changed():
-	pass
-
 
 @rpc("authority", "unreliable")
 func sync_transform(transf, lVel, aVel):
@@ -41,8 +21,11 @@ func sync_transform(transf, lVel, aVel):
 	linear_velocity = lVel
 	angular_velocity = aVel
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	
-	if multiplayer.is_server() and canBeTaken:
+	if multiplayer.is_server():
 		rpc("sync_transform", global_transform, linear_velocity, angular_velocity)
 
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(_delta):
+	pass

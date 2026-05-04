@@ -8,4 +8,5 @@ layers = 2
 size = Vector3(0.2, 0.2, 0.1)
 texture_albedo = ExtResource("1_n1x64")
 distance_fade_enabled = true
+distance_fade_begin = 25.0
 cull_mask = 1047554

@@ -32,7 +32,7 @@ func restart():
 	timer.start()
 
 func destroy_object():
-	$/root/Main.remove_item(self.get_path())
+	$/root/Main.server_remove_item(self.name)
 
 func _on_timer_timeout():
 	active = true

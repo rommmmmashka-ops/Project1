@@ -1,7 +1,10 @@
 [gd_scene load_steps=9 format=3 uid="uid://coj6up7i4dt24"]
 
 [ext_resource type="Script" path="res://Objects/Object/test_object.gd" id="1_k4q3a"]
-[ext_resource type="Texture2D" uid="uid://bcprkg6i4m2hj" path="res://Objects/Object/Brick_icon.png" id="2_i1d1y"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_yjc1u"]
+friction = 3.0
+bounce = 0.1
 
 [sub_resource type="Animation" id="Animation_scasb"]
 length = 0.001
@@ -51,11 +54,12 @@ size = Vector3(0.25, 0.25, 0.25)
 
 [node name="TestObject" type="RigidBody3D"]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 7
+physics_material_override = SubResource("PhysicsMaterial_yjc1u")
 script = ExtResource("1_k4q3a")
 itemName = "Test"
 path = "res://Objects/Object/test_object.tscn"
-icon = ExtResource("2_i1d1y")
+icon = "res://Objects/Object/Brick_icon.png"
 isOneUsage = false
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

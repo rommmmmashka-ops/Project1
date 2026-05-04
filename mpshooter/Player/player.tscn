@@ -1,6 +1,6 @@
 [gd_scene load_steps=18 format=3 uid="uid://cryiv2n4polqc"]
 
-[ext_resource type="Script" path="res://Player/TestCharacterBody3D.gd" id="1_necku"]
+[ext_resource type="Script" path="res://Player/TestCharacterBody3D.gd" id="1_dpmc1"]
 [ext_resource type="Script" path="res://Player/Hitbox.gd" id="2_734s4"]
 [ext_resource type="Script" path="res://Player/Interface.gd" id="3_8ukuv"]
 [ext_resource type="Script" path="res://Player/Inventory.gd" id="4_i56a1"]
@@ -57,7 +57,11 @@ properties/3/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
-script = ExtResource("1_necku")
+script = ExtResource("1_dpmc1")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.2, 0)
+text = "NAME"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 

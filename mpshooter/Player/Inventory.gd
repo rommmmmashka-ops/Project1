@@ -20,26 +20,27 @@ func _process(_delta):
 func change(Inventory):
 	#print("OK")
 	if Inventory[0]:
-		Item1.texture = Inventory[0].Icon
+		#print("Textrure:", Inventory[0].Icon)
+		#Item1.texture = load(Inventory[0].Icon)
 		Count1.text = str(Inventory[0].Count)
 	else:
 		Item1.texture = null
 		Count1.text = ""
 	if Inventory[1]:
-		Item2.texture = Inventory[1].Icon
+		#Item2.texture = load(Inventory[1].Icon)
 		Count2.text = str(Inventory[1].Count)
 	else:
 		Item2.texture = null
 		Count2.text = ""
 	if Inventory[2]:
-		Item3.texture = Inventory[2].Icon
+		#Item3.texture = load(Inventory[2].Icon)
 		Count3.text = str(Inventory[2].Count)
 	else:
 		Item3.texture = null
 		Count3.text = ""
 	if Inventory[3]:
-		Item4.texture = str(Inventory[3].Count)
-		Count4.text = Inventory[3].Count
+		#Item4.texture = load(Inventory[3].Icon)
+		Count4.text = str(Inventory[3].Count)
 	else:
 		Item4.texture = null
 		Count4.text = ""

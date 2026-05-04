@@ -1,0 +1,94 @@
+[gd_scene load_steps=10 format=3 uid="uid://gf61ilir2pds"]
+
+[ext_resource type="Script" path="res://Guns/Bazooka/BazookaView.gd" id="1_0i5up"]
+[ext_resource type="ArrayMesh" uid="uid://bghjlglob34qv" path="res://Guns/Bazooka/Bazooka.obj" id="1_47sif"]
+[ext_resource type="PackedScene" uid="uid://wdgyqla7clog" path="res://Guns/Bazooka/BazookaRocket.tscn" id="2_aq6qn"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_m7foa"]
+friction = 5.0
+rough = true
+bounce = 0.1
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_287sl"]
+height = 3.0
+radius = 0.26
+
+[sub_resource type="Animation" id="Animation_4hw8n"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_3kn50"]
+resource_name = "Reload"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.7, 1.3, 2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(-0.523599, 0, 0), Vector3(-0.523599, 0, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jotbg"]
+_data = {
+"RESET": SubResource("Animation_4hw8n"),
+"Reload": SubResource("Animation_3kn50")
+}
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_rumws"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:scale")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+
+[node name="Bazooka" type="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.215027, 0)
+collision_layer = 4
+collision_mask = 3
+mass = 8.0
+physics_material_override = SubResource("PhysicsMaterial_m7foa")
+script = ExtResource("1_0i5up")
+itemName = "Bazooka"
+path = "res://Guns/Bazooka/Bazooka.tscn"
+weight = 6
+isOneUsage = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, -0.319073, 0)
+mesh = ExtResource("1_47sif")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, -0.019, -0.02)
+shape = SubResource("CylinderShape3D_287sl")
+
+[node name="Rocket" parent="." instance=ExtResource("2_aq6qn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.019, -0.2)
+freeze = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_jotbg")
+}
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_rumws")

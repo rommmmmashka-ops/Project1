@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://c74lksb1ld0f2"]
+
+[ext_resource type="Script" path="res://Decals & Shaders/Tracers/Tracer.gd" id="1_7esap"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6d36e"]
+transparency = 2
+alpha_scissor_threshold = 0.792
+alpha_antialiasing_mode = 2
+alpha_antialiasing_edge = 0.32
+albedo_color = Color(0.640823, 0.621701, 0.610345, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_gu12e"]
+material = SubResource("StandardMaterial3D_6d36e")
+top_radius = 0.005
+bottom_radius = 0.005
+height = 20.0
+
+[node name="MeshInstance3D" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -10)
+mesh = SubResource("CylinderMesh_gu12e")
+script = ExtResource("1_7esap")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

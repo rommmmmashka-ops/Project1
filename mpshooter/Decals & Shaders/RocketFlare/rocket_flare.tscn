@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://crg7eg3g7mp5n"]
+
+[sub_resource type="Curve" id="Curve_4h8ft"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_eljmw"]
+curve = SubResource("Curve_4h8ft")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_jfc6p"]
+scale_min = 0.5
+scale_max = 1.5
+scale_curve = SubResource("CurveTexture_eljmw")
+color = Color(0.821723, 0.461379, 0.243519, 1)
+
+[node name="RocketFlare" type="Node3D"]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+lifetime = 0.01
+process_material = SubResource("ParticleProcessMaterial_jfc6p")

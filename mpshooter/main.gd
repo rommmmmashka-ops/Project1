@@ -9,100 +9,132 @@ var ip_adress = "127.0.0.1"
 var active_items = {}
 
 
-func _ready():
-	for i in self.get_children():
-		if i.name == "MultiplayerSpawner" or i.name == "MainMenu":
-			active_items[i.name] = null
-		else:
-			active_items[i.name] = i.get_path()
-	print(active_items)
-
-func get_item(itemName):
-	if itemName in active_items:
-		return get_node(active_items[itemName])
-
-@rpc("authority", "reliable", "call_local")
-func throw(object_name: String, dir: Vector3, force: float):
-	if multiplayer.is_server(): 
-		var obj = find_child(object_name, true, false)
-		if obj:
-			#obj.get_node("AnimationPlayer").play("RESET")
-			obj.reparent(self)
-			obj.freeze = false
-			obj.canBeTaken = true
-			obj.linear_velocity = dir * force
-			add_item(obj)
-			rpc("client_show_throw", object_name, obj.global_transform, dir, force)
-
-@rpc("any_peer", "call_local")
-func client_show_throw(object_name: String, transf: Transform3D, dir: Vector3, force: float):
-	if multiplayer.is_server():
-		return 
-
-	var obj = find_child(object_name, true, false)
-	if obj:
-		obj.reparent(self)
-		obj.global_transform = transf
-		obj.freeze = false
-		obj.canBeTaken = true
-		obj.linear_velocity = dir * force
+var nextID: int = 1
+func generate_id():
+	var netID = nextID
+	nextID += 1
+	return netID
 
 
-@rpc("authority", "reliable")
-func server_remove_item(item):
+func register_existing_item(node):
 	if !multiplayer.is_server():
-		return
-	print(item)
-	if !item:
-		print("Returned servert")
-		return
-
-	if active_items.has(item):
-		get_item(item).queue_free()
-		active_items.erase(item)
-
-	rpc("client_remove_item", item)
-
-@rpc("any_peer", "call_local")
-func client_remove_item(item):
-	if multiplayer.is_server():
-		return
-	if !item:
-		print("Returned client")
-		return
-	get_item(item).queue_free()
-	active_items.erase(item)
-
-
-@rpc("authority", "reliable")
-func add_item(item):
-	if !multiplayer.is_server():
-		return
-	if !item:
 		return
 	
-	var path = find_child(item,true,false).get_path()
-	active_items[item] = path
-	rpc("add_item_client", item, path)
+	active_items[node.netID] = node
+	
+	rpc("register_existing_item_client", node.netID, node.get_path())
 
-@rpc("any_peer", "call_local")
-func add_item_client(item, path):
-	if !item:
+@rpc("any_peer", "reliable")
+func register_existing_item_client(netID, path):
+	if multiplayer.is_server():
 		return
-	active_items[item] = path
+	
+	var node = get_node_or_null(path)
+	if node:
+		node.netID = netID
+		active_items[netID] = node
+
+
+func _on_multiplayer_spawner_spawned(node):
+	print("Spawned: ", node)
+	node.netID = generate_id()
+	add_item(node)
+
+func spawn_item(scene_path: String, tform: Transform3D):
+	if !multiplayer.is_server():
+		return
+	
+	var scene = load(scene_path)
+	var item = scene.instantiate()
+	
+	item.netID = generate_id()
+	add_child(item)
+	item.global_transform = tform
+	
+	active_items[item.netID] = item
+	
+	rpc("spawn_item_client", item.netID, scene_path, tform)
+	
+@rpc("any_peer", "reliable")
+func spawn_item_client(netID, scene_path, tform):
+	if multiplayer.is_server():
+		return
+	
+	var scene = load(scene_path)
+	var item = scene.instantiate()
+	
+	item.netID = netID
+	add_child(item)
+	item.global_transform = tform
+	
+	active_items[netID] = item
+
+func _ready():
+	for child in self.get_children():
+		if child is RigidBody3D:
+			active_items[child.netID] = child
+	#print("Items:", active_items)
+
+func get_item(netID):
+	if netID in active_items:
+		return active_items[netID]
+		
+
+@rpc("authority", "reliable")
+func add_item(node):
+	if !multiplayer.is_server() or !node:
+		return
+	
+	#print("Node is: ", node)
+	active_items[node.netID] = node
+	#print("Server add Items:", active_items)
+	rpc("add_item_client", node.get_path(), node.netID)
+
+@rpc("any_peer", "reliable")
+func add_item_client(nodePath, netID):
+	if !netID or !nodePath:
+		return
+	#print("Client add NodePath and id ", nodePath, " ", netID)
+	var node = get_node_or_null(nodePath)
+	if node:
+		active_items[netID] = node
+	#print("Clietn add active items list: ", active_items)
+
+@rpc("authority", "reliable")
+func server_remove_item(netID):
+	if !multiplayer.is_server() or !active_items.has(netID):
+		return 
+	
+	var node = active_items[netID]
+	#print("Server remove node: ", node)
+	node.queue_free()
+	active_items.erase(netID)
+	
+	rpc("client_remove_item", netID)
+
+@rpc("any_peer", "reliable")
+func client_remove_item(netID):
+	if multiplayer.is_server() or !active_items.has(netID):
+		return
+	
+	var node = active_items[netID]
+	#print("Client remove active items list: ", active_items)
+	#print("Client remove node: ", node)
+	node.queue_free()
+	active_items.erase(netID)
 
 @rpc("any_peer", "call_local")
 func sync_full_state(items_data: Dictionary):
-	print(items_data)
+	#print("Items data: ", items_data)
 	for child in get_children():
-		if child.name in items_data:
+		if not child is RigidBody3D or child.netID in items_data:
 			print(child.name)
 			continue
-		if not str(child.name).is_valid_int():
-			child.queue_free()
+		#if not str(child.name).is_valid_int():
+		child.queue_free()
 
 func _on_line_edit_text_submitted(new_text):
-	ip_adress = $MainMenu/LineEdit.new_text
+	ip_adress = new_text
 
 func _on_host_pressed():
 	peer.create_server(PORT)
@@ -112,11 +144,9 @@ func _on_host_pressed():
 	add_player()
 	#upnp_setup()
 	$MainMenu.hide()
-	
-
 
 func _on_join_pressed():
-	peer.create_client("127.0.0.1", PORT)
+	peer.create_client(ip_adress, PORT)
 	multiplayer.multiplayer_peer = peer
 	$MainMenu.hide()
 	
@@ -126,7 +156,11 @@ func add_player(id = 1):
 	player.set_multiplayer_authority(id)
 	call_deferred("add_child", player)
 	if multiplayer.is_server():
-		rpc_id(id, "sync_full_state", active_items)
+		var items_data = {}
+		for itemID in active_items.keys():
+			#print(itemID)
+			items_data[itemID] = active_items[itemID].get_path()
+		rpc_id(id, "sync_full_state", items_data)
 
 
 func exit_game(id):
@@ -138,7 +172,7 @@ func del_player(id):
 
 @rpc("any_peer", "call_local")
 func _del_player(id):
-	get_node(str(id)).queue_free()
+	get_node_or_null(str(id)).queue_free()
 
 
 func upnp_setup():
@@ -156,3 +190,6 @@ func upnp_setup():
 	"UPNP PORT Mappnig Failed! %s" % map)
 	
 	print("Success! Join Adress: %s" % upnp.query_external_address()) 
+
+
+

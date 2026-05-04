@@ -1,0 +1,117 @@
+[gd_scene load_steps=16 format=3 uid="uid://wdgyqla7clog"]
+
+[ext_resource type="ArrayMesh" uid="uid://bbmqsn1nnc2h7" path="res://Guns/Bazooka/BazookaRocket.obj" id="1_2bvge"]
+[ext_resource type="Script" path="res://Guns/Bazooka/BazookaRocket.gd" id="1_jk0of"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_3mt86"]
+height = 2.5
+radius = 0.16
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bu0mv"]
+radius = 0.1
+height = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_xtd5h"]
+radius = 3.0
+
+[sub_resource type="Gradient" id="Gradient_4xr8u"]
+offsets = PackedFloat32Array(0.0172414, 0.5, 1)
+colors = PackedColorArray(0.84281, 0.777358, 7.70092e-07, 1, 0.920026, 0.886726, 0.491228, 1, 0.923916, 0.142446, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dfl3f"]
+gradient = SubResource("Gradient_4xr8u")
+
+[sub_resource type="Curve" id="Curve_2s0j2"]
+max_value = 2.0
+_data = [Vector2(0, 2), 0.0, 0.0, 0, 0, Vector2(0.465278, 2), 0.0, 0.0, 0, 0, Vector2(1, 0.813187), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_75hab"]
+curve = SubResource("Curve_2s0j2")
+
+[sub_resource type="Curve" id="Curve_flm5f"]
+_data = [Vector2(0, 0.010989), 0.0, 0.0, 0, 0, Vector2(0.256944, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_wh67q"]
+curve = SubResource("Curve_flm5f")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_phgsf"]
+direction = Vector3(0, 0, 1)
+spread = 20.0
+initial_velocity_min = 2.0
+initial_velocity_max = 4.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_curve = SubResource("CurveTexture_wh67q")
+color = Color(0.935965, 0.553265, 0, 1)
+color_ramp = SubResource("GradientTexture1D_dfl3f")
+emission_curve = SubResource("CurveTexture_75hab")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4xfru"]
+transparency = 1
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_w0u6k"]
+material = SubResource("StandardMaterial3D_4xfru")
+radial_segments = 6
+rings = 4
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_phl77"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:scale")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+
+[node name="Rocket" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 3
+mass = 4.0
+gravity_scale = 0.5
+script = ExtResource("1_jk0of")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, -0.5)
+mesh = ExtResource("1_2bvge")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0.1)
+shape = SubResource("CylinderShape3D_3mt86")
+disabled = true
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.1)
+shape = SubResource("CapsuleShape3D_bu0mv")
+
+[node name="Area3D2" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+shape = SubResource("SphereShape3D_xtd5h")
+
+[node name="GPUParticles3D2" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.749546)
+layers = 4
+emitting = false
+amount = 10
+lifetime = 0.6
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_phgsf")
+draw_pass_1 = SubResource("SphereMesh_w0u6k")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_phl77")
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_entered" from="Area3D2" to="." method="_on_area_3d_2_body_entered"]

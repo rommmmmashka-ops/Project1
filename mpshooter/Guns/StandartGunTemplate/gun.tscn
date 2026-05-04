@@ -143,7 +143,7 @@ layers = 4
 mesh = SubResource("CylinderMesh_uqo53")
 
 [node name="ShotMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.2, 0, 0, 0, -1.31134e-08, 0.2, 0, -0.3, -8.74228e-09, 0, 0, -0.18)
+transform = Transform3D(0.2, 0, 0, 0, -1.31134e-08, 0.2, 0, -0.3, -8.74228e-09, 0, 0, -0.16527)
 layers = 4
 material_override = SubResource("StandardMaterial3D_uw0f5")
 mesh = ExtResource("3_ovmw7")
@@ -152,10 +152,11 @@ mesh = ExtResource("3_ovmw7")
 transform = Transform3D(5, 0, 0, 0, 3.33333, 2.84217e-14, 0, -4.26326e-14, 5, 0, 0.415475, 2.72415e-08)
 layers = 5
 light_color = Color(1, 1, 0.176471, 1)
-light_energy = 3.0
-light_size = 0.2
-omni_range = 20.0
-omni_attenuation = 0.307784
+light_energy = 0.805
+light_indirect_energy = 0.0
+light_size = 0.327
+omni_range = 1.277
+omni_attenuation = 0.196144
 
 [node name="Timer" type="Timer" parent="ShotMesh"]
 wait_time = 0.05

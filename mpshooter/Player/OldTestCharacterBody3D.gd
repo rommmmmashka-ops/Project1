@@ -45,7 +45,7 @@ var maxWeight = 20
 var curWeight = 0
 var Inventory = [null,null,null,null]
 var actCell = 0
-#var curItem = null
+var curItem = null
 
 var itemLogic: ItemLogic
 
@@ -53,7 +53,7 @@ var itemLogic: ItemLogic
 #Inventory
 
 func add_to_inv(item):
-	#print("Adding", self.name)
+	print("Adding", self.name)
 	if multiplayer.is_server():
 		server_add_to_inv(item.netID,item.itemName,item.path,item.icon,item.weight,item.isForBuilding,item.isOneUsage,item.properties)
 	else:
@@ -62,20 +62,19 @@ func add_to_inv(item):
 @rpc("any_peer", "reliable")
 func server_add_to_inv(itemID, itn,pth,icn,wth,ifb,iou,props):
 	if !multiplayer.is_server():
-		#print("Not server")
+		print("Not server")
 		return
 	
-	#print("Icon: ", icn)
-	#print(itemID)
+	print(itemID)
 	if !itemID:
-		#print("Not item")
+		print("Not item")
 		return
 	
 	#$/root/Main.active_items.erase(itemName)
 	
 	remove_item(itemID)
 	add_to_inv_def(itn,pth,icn,wth,ifb,iou,props)
-	#print(itn)
+	print(itn)
 	
 	#rpc_id(multiplayer.get_remote_sender_id(), "client_add_to_inv", Inventory)
 	rpc("client_add_to_inv",Inventory)
@@ -83,7 +82,7 @@ func server_add_to_inv(itemID, itn,pth,icn,wth,ifb,iou,props):
 func add_to_inv_def(itemName,path,icon,weight,isForBuilding,isOneUsage,properties):
 	if has_item(itemName):
 		get_item(itemName).Count += 1
-		#print("Inventory: ", self.name, Inventory)
+		print("Inventory: ", self.name, Inventory)
 	else:
 		var key = {
 			"Name": itemName,
@@ -105,7 +104,7 @@ func add_to_inv_def(itemName,path,icon,weight,isForBuilding,isOneUsage,propertie
 @rpc("any_peer", "call_local")
 func client_add_to_inv(newInventory):
 	Inventory = newInventory.duplicate(true)
-	#print("Sync Inventory: ", self.name,  Inventory)
+	print("Sync Inventory: ", self.name,  Inventory)
 	Inv.change(Inventory)
 
 
@@ -142,9 +141,9 @@ func server_use_item(item, params: Dictionary, mbtn):
 		return
 	
 	var used = itemLogic.use(self, params, mbtn)
-	#print(used, itemLogic)
+	print(used, itemLogic)
 	if used.is_empty():
-		#print("empty")
+		print("empty")
 		return
 	var props = used[0]
 	var type = used[1]
@@ -186,15 +185,15 @@ func is_full(itemWeight = 0):
 			return false
 	return true
 
-func has_item(IName):
+func has_item(Name):
 	for i in maxInventory:
-		if Inventory[i] and Inventory[i].Name == IName:
+		if Inventory[i] and Inventory[i].Name == Name:
 			return true
 	return false
 
-func get_item(IName):
+func get_item(Name):
 	for i in maxInventory:
-		if Inventory[i] and Inventory[i].Name == IName:
+		if Inventory[i] and Inventory[i].Name == Name:
 			return Inventory[i]
 
 #@rpc("any_peer", "call_local", "reliable")
@@ -205,25 +204,30 @@ func delete_from_inv(i):
 	if !Inventory[i]:
 		return 
 	curWeight -= Inventory[i].Weight
+	#Inventory.remove_at(i)
+	#Inventory.insert(i, 0)
 	Inventory[i] = null
 	
 	Inv.change(Inventory)
-	#print("Inventory after deleting: ", self.name, Inventory)
+	print("Inventory after deleting: ", self.name, Inventory)
 	rpc("client_add_to_inv", Inventory)
 
+#func get_curItem():
+	#if Head.get_child_count() >= 5:
+		#return Head.get_child(4)
 
 func get_curItem():
 	return Inventory[actCell]
 
 func get_curItemN():
-	if get_curItem():
-		return get_held_item(get_curItem().Name)
+	if curItem:
+		return get_held_item(curItem.Name)
 
 func get_held_item(itemName): 
 	if Head.get_child_count()>= 5: 
 		for chil in Head.get_children():
 			if chil.has_method("changed") and chil.itemName == itemName:
-				#print(chil.name, itemName)
+				print(chil.name, itemName)
 				return chil
 	return null
 
@@ -231,27 +235,31 @@ func get_held_item(itemName):
 
 func set_cur_item(i):
 	if !Inventory[i]:
-		#print("No Inventory i")
+		print("No Inventory i")
+		curItem = null
 		if multiplayer.is_server():
 			hide_item()
 		else:
 			rpc_id(1, "hide_item")
 		#return
 	else:
+		curItem = Inventory[i]
 		if multiplayer.is_server():
-			show_item(get_curItem())
-			print("Item:   ", var_to_str(get_curItem()))
+			show_item(curItem)
 		else:
-			rpc_id(1, "show_item", get_curItem())
-			print("Item:   ", var_to_str(get_curItem()))
+			rpc_id(1, "show_item", curItem)
 	rpc("client_add_to_inv", Inventory)
 	rpc("set_client_cur_item", i)
-	
 
 @rpc("any_peer", "call_local")
 func set_client_cur_item(i):
-	actCell = i
-	#print("Inventory afre cutItem", self.name, Inventory)
+	curItem = Inventory[i]
+	print("Inventory afre cutItem", self.name, Inventory)
+
+
+#@rpc("authority", "reliable")
+#func hide_item():
+	#rpc("_remove_held_item")
 
 @rpc("any_peer", "reliable")
 func hide_item():
@@ -267,13 +275,15 @@ func show_item(item):
 func _spawn_held_item(Item):
 	_remove_held_item()
 	var item = get_held_item(Item.Name)
-	#print("Held item: ", item)
 	if !item:
 		var scene = load(Item.Path)
 		item = scene.instantiate()
 		Head.add_child(item)
 		item.set_position(Hand.get_position())
 	
+
+	#var scene = load(Item.Path)
+	#var item = scene.instantiate()
 	
 	item.canBeTaken = false
 	item.freeze = true
@@ -282,7 +292,7 @@ func _spawn_held_item(Item):
 	item.get_node("CollisionShape3D").disabled = true
 	item.show()
 	equip_item(Item)
-	#print("Inventory: ", self.name, Inventory)
+	print("Inventory: ", self.name, Inventory)
 	#print(Head.get_children())
 
 
@@ -307,7 +317,7 @@ func throw(force = 10.0):
 	
 	var dir = -Cam.global_transform.basis.z.normalized()
 
-	#print("Throw cur item: ", get_curItem(), actCell)
+	print("Throw cur item: ", curItem, actCell)
 	var item = get_curItemN()
 	if !item:
 		#print("No item")
@@ -319,39 +329,44 @@ func throw(force = 10.0):
 	item.changed()
 	item.get_node("CollisionShape3D").disabled = false
 	#print(item)
+	#await get_tree().create_timer(0.1).timeout
 	item.linear_velocity = dir * force
-	#print("Inventory after throw: ", self.name, Inventory)
-	rpc("client_throw", item.global_transform, dir, force)
+	curItem = null
 	delete_from_inv(actCell)
+	rpc("client_add_to_inv", Inventory)
+	#rpc("delete_from_inv", actCell)
+	print("Inventory after throw: ", self.name, Inventory)
+	rpc("client_throw", item.global_transform, dir, force)
 	$/root/Main.add_item(item)
 
 @rpc("any_peer", "call_local")
 func client_throw(transf, _dir, _force):
-	#print("ClientThrow")
+	print("ClientThrow")
 	if multiplayer.is_server():
 		return
 	
 	var item = get_curItemN()
 	if !item:
-		#print("isnt item")
+		print("isnt item")
 		return
 	
-	#print("Inventory after throw: ", self.name, Inventory)
-	#print("Act cell", actCell, get_curItem())
+	#delete_from_inv(actCell)
+	curItem = null
+	
+	print("Inventory after throw: ", self.name, Inventory)
+	print("Act cell", actCell, curItem)
 	item.reparent($/root/Main)
 	item.global_transform = transf
 	item.freeze = false
 	item.canBeTaken = true
 	item.changed()
 	item.get_node("CollisionShape3D").disabled = false
-	#item.linear_velocity = _dir * _force
+	#item.linear_velocity = dir * force
 
 
 
 # Main
 func _ready():
-	await get_tree().process_frame
-	print("Player: ", name, " ", netID)
 	Cam.current = is_multiplayer_authority()
 	if !is_multiplayer_authority():
 		Inv.hide()
@@ -388,21 +403,21 @@ func _unhandled_input(e):
 			var cast = Ray.get_collider()
 			#print(cast)
 			if e.button_index == MOUSE_BUTTON_LEFT and e.pressed:
-				if get_curItem() and Head.get_child(4):
+				if curItem and Head.get_child(4):
 					if multiplayer.is_server():
-						server_use_item(get_curItem(), {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "left")
+						server_use_item(curItem, {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "left")
 					else:
-						rpc_id(1, "server_use_item",get_curItem(), {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "left")
+						rpc_id(1, "server_use_item",curItem, {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "left")
 			elif e.button_index == MOUSE_BUTTON_RIGHT and e.pressed:
-				if get_curItem():
+				if curItem:
 					if multiplayer.is_server():
-						server_use_item(get_curItem(), {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "right")
+						server_use_item(curItem, {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "right")
 					else:
-						rpc_id(1, "server_use_item",get_curItem(), {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "right")
+						rpc_id(1, "server_use_item",curItem, {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "right")
 				elif cast and !is_full(cast.weight) and cast.canBeTaken:
 					add_to_inv(cast)
-					await get_tree().process_frame
-					set_cur_item(actCell)
+					#await get_tree().process_frame
+					#set_cur_item(actCell)
 					#print("In[uted]")
 		elif e is InputEventMouseMotion:
 			rotate_y(-e.relative.x * SENSIVITY * sensivity)
@@ -486,21 +501,6 @@ func _physics_process(delta):
 
 	move_and_slide()
 
-@rpc("any_peer", "call_local")
-func respawn():
-	print("Respawn asked")
-	if health > 0:
-		return
-	rpc("respawn_client")
-
-@rpc("any_peer", "call_local", "reliable")
-func respawn_client():
-	print("Respawned", name)
-	health = 100
-	self.position = Vector3.ZERO
-	for child in get_children():
-		if child.name.begins_with("Decal") or child.name.begins_with("@Decal"):
-			child.queue_free()
 
 
 func receive_dmg(dmg = 1, zone = "Body", hit = null):
@@ -513,19 +513,13 @@ func receive_dmg(dmg = 1, zone = "Body", hit = null):
 func receive_dmg_rpc(dmg, _zone, _hit):
 	health -= dmg
 	if health <= 0:
-		if multiplayer.is_server():
-			respawn()
-		else:
-			rpc_id(1, "respawn")
-		#health = 100
-		#position = Vector3.ZERO
+		health = 100
+		position = Vector3.ZERO
 
 @rpc("any_peer", "call_local")
 func add_decal(hit):
 	var decal = load("res://Decals & Shaders/Blood/blood.tscn").instantiate()
 	add_child(decal)
-	#if multiplayer.is_server():
-	#	$/root/Main.add_item(decal)
 	decal.global_position = hit.position
 	decal.global_transform.origin = hit.position
 	decal.global_transform.basis = Basis.looking_at(hit.normal, Vector3.UP)

@@ -19,7 +19,7 @@ func _init(data):
 func _can_use() -> bool:
 	return Time.get_ticks_msec() / 1000.0 >= nextTime
 
-func use(player, params):
+func use(player, params, _mbtn):
 	if not _can_use():
 		return [] 
 	
