@@ -78,7 +78,7 @@ func sync_transform(transf, lVel, aVel):
 	linear_velocity = lVel
 	angular_velocity = aVel
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	
 	if multiplayer.is_server() and canBeTaken:
 		rpc("sync_transform", global_transform, linear_velocity, angular_velocity)

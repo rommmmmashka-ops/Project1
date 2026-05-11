@@ -103,7 +103,7 @@ func _physics_process(delta):
 
 
 
-func _on_area_3d_body_entered(body):
+func _on_area_3d_body_entered(_body):
 	if active and timer >= 0.2:
 		#print("colidingbody: ",body)
 		rpc("spawn_explosion")
@@ -111,7 +111,7 @@ func _on_area_3d_body_entered(body):
 		$/root/Main.server_remove_item(self.netID)
 
 
-func _on_area_3d_2_body_entered(body):
+func _on_area_3d_2_body_entered(_body):
 	if active and timer >= fuseTime:
 		#print("colidingbody: ",body)
 		rpc("spawn_explosion")

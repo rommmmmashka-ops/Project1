@@ -18,9 +18,11 @@ func generate_id():
 
 func register_existing_item(node):
 	if !multiplayer.is_server():
+		print("Not  server")
 		return
 	
 	active_items[node.netID] = node
+	print("registered: ", node, " ", node.netID)
 	
 	rpc("register_existing_item_client", node.netID, node.get_path())
 
@@ -30,50 +32,19 @@ func register_existing_item_client(netID, path):
 		return
 	
 	var node = get_node_or_null(path)
+	print("The node is: ", node, "   ", netID)
 	if node:
 		node.netID = netID
 		active_items[netID] = node
+	print("Client register:  ",active_items)
 
 
-func _on_multiplayer_spawner_spawned(node):
-	print("Spawned: ", node)
-	node.netID = generate_id()
-	add_item(node)
-
-func spawn_item(scene_path: String, tform: Transform3D):
-	if !multiplayer.is_server():
-		return
-	
-	var scene = load(scene_path)
-	var item = scene.instantiate()
-	
-	item.netID = generate_id()
-	add_child(item)
-	item.global_transform = tform
-	
-	active_items[item.netID] = item
-	
-	rpc("spawn_item_client", item.netID, scene_path, tform)
-	
-@rpc("any_peer", "reliable")
-func spawn_item_client(netID, scene_path, tform):
-	if multiplayer.is_server():
-		return
-	
-	var scene = load(scene_path)
-	var item = scene.instantiate()
-	
-	item.netID = netID
-	add_child(item)
-	item.global_transform = tform
-	
-	active_items[netID] = item
 
 func _ready():
 	for child in self.get_children():
-		if child is RigidBody3D:
+		if child is RigidBody3D or child is CharacterBody3D:
 			active_items[child.netID] = child
-	#print("Items:", active_items)
+	print("Items:", active_items)
 
 func get_item(netID):
 	if netID in active_items:
@@ -82,11 +53,14 @@ func get_item(netID):
 
 @rpc("authority", "reliable")
 func add_item(node):
+	#print("Adding ", node)
 	if !multiplayer.is_server() or !node:
+		print(multiplayer.is_server(), "  ", node)
 		return
 	
 	#print("Node is: ", node)
 	active_items[node.netID] = node
+	#print("Added ", active_items)
 	#print("Server add Items:", active_items)
 	rpc("add_item_client", node.get_path(), node.netID)
 
@@ -125,13 +99,47 @@ func client_remove_item(netID):
 
 @rpc("any_peer", "call_local")
 func sync_full_state(items_data: Dictionary):
-	#print("Items data: ", items_data)
+	print("Items data: ", items_data)
 	for child in get_children():
-		if not child is RigidBody3D or child.netID in items_data:
-			print(child.name)
+		if not child is RigidBody3D:
+			print(child)
 			continue
-		#if not str(child.name).is_valid_int():
-		child.queue_free()
+		if not child.netID in items_data:
+			child.queue_free()
+
+@rpc("any_peer", "reliable")
+func reparent_item(itemID, parentID, additionalNode = null):
+	print(itemID, " ", parentID, " ", additionalNode)
+	if !multiplayer.is_server() or !active_items.has(itemID) or !active_items.has(parentID):
+		print("Returned")
+		return
+	print("Active items: ", active_items)
+	var item = active_items[itemID]
+	var parent = active_items[parentID]
+	print(item," ", parent)
+	if additionalNode:
+		var node = parent.get_node_or_null(additionalNode)
+		item.reparent(node)
+		print("Reparented", node)
+	else:
+		item.reparent(parent)
+	
+	rpc("reparent_item_client", itemID, parentID, additionalNode)
+
+@rpc("authority", "reliable")
+func reparent_item_client(itemID, parentID, additionalNode):
+	print("Client act items: ", active_items)
+	var item = active_items[itemID]
+	var parent = active_items[parentID]
+	print(item, "     ", parent)
+	item.reparent(parent)
+	if additionalNode:
+		var node = parent.get_node_or_null(additionalNode)
+		item.reparent(node)
+		print("Clietn reparented", node)
+	else:
+		item.reparent(parent)
+
 
 func _on_line_edit_text_submitted(new_text):
 	ip_adress = new_text
@@ -154,13 +162,43 @@ func add_player(id = 1):
 	var player = playerPacked.instantiate()
 	player.name = str(id)
 	player.set_multiplayer_authority(id)
-	call_deferred("add_child", player)
+	#call_deferred("add_child", player)
+	add_child(player)
+	print("Act items aftert player: ", active_items)
 	if multiplayer.is_server():
+		#print("Registering")
+		await player._ready
+		print("Player ready")
+		register_existing_item(player)
 		var items_data = {}
 		for itemID in active_items.keys():
 			#print(itemID)
 			items_data[itemID] = active_items[itemID].get_path()
 		rpc_id(id, "sync_full_state", items_data)
+
+#func _add_player(id = 1):
+	#var player = playerPacked.instantiate()
+#
+	#player.name = str(id)
+	#player.set_multiplayer_authority(id)
+#
+	#add_child(player)
+#
+	#if multiplayer.is_server():
+#
+		#await player.ready
+#
+		#if player.netID == 0:
+			#player.netID = generate_id()
+#
+		#register_existing_item(player)
+#
+		#var items_data = {}
+#
+		#for itemID in active_items.keys():
+			#items_data[itemID] = str(active_items[itemID].get_path())
+#
+		#rpc_id(id, "sync_full_state", items_data)
 
 
 func exit_game(id):

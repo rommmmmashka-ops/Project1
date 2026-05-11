@@ -66,16 +66,20 @@ func server_add_to_inv(itemID, itn,pth,icn,wth,ifb,iou,props):
 		return
 	
 	#print("Icon: ", icn)
-	#print(itemID)
+	print(itemID)
 	if !itemID:
-		#print("Not item")
+		print("Not item")
 		return
 	
 	#$/root/Main.active_items.erase(itemName)
 	
-	remove_item(itemID)
+	#remove_item(itemID)
+	$/root/Main.reparent_item(itemID, self.netID, get_path_to(Head))
+	#$/root/Main.rpc_id(1, "reparent_item", itemID, self.netID, Head.get_path())
 	add_to_inv_def(itn,pth,icn,wth,ifb,iou,props)
-	#print(itn)
+	#await get_tree().create_timer(0.2).timeout
+	set_cur_item(actCell)
+	print(itn)
 	
 	#rpc_id(multiplayer.get_remote_sender_id(), "client_add_to_inv", Inventory)
 	rpc("client_add_to_inv",Inventory)
@@ -133,8 +137,6 @@ func equip_item(item):
 		"Bazooka":
 			itemLogic = BazookaLogic.new(item.Props)
 		
-	#if item.Name == "Gun":
-	#	itemLogic = GunLogic.new(item.Props)
 
 @rpc("any_peer", "reliable")
 func server_use_item(item, params: Dictionary, mbtn):
@@ -220,11 +222,14 @@ func get_curItemN():
 		return get_held_item(get_curItem().Name)
 
 func get_held_item(itemName): 
-	if Head.get_child_count()>= 5: 
+	if Head.get_child_count()>= 5:
 		for chil in Head.get_children():
+			print(chil)
 			if chil.has_method("changed") and chil.itemName == itemName:
 				#print(chil.name, itemName)
 				return chil
+	print("NEI") 
+	print(Head.get_children())
 	return null
 
 
@@ -266,15 +271,16 @@ func show_item(item):
 @rpc("any_peer", "reliable", "call_local")
 func _spawn_held_item(Item):
 	_remove_held_item()
+	print(Item)
 	var item = get_held_item(Item.Name)
-	#print("Held item: ", item)
-	if !item:
-		var scene = load(Item.Path)
-		item = scene.instantiate()
-		Head.add_child(item)
-		item.set_position(Hand.get_position())
-	
-	
+	print("Held item: ", item)
+	#if !item:
+		#var scene = load(Item.Path)
+		#item = scene.instantiate()
+		#Head.add_child(item)
+		
+	item.set_position(Hand.get_position())
+	item.set_rotation(Hand.get_rotation())
 	item.canBeTaken = false
 	item.freeze = true
 	item.change_props(Item.Props)
@@ -350,6 +356,10 @@ func client_throw(transf, _dir, _force):
 
 # Main
 func _ready():
+	if multiplayer.is_server():
+		#if !netID:
+		netID = $/root/Main.generate_id()
+		#$/root/Main.register_existing_item(self)
 	await get_tree().process_frame
 	print("Player: ", name, " ", netID)
 	Cam.current = is_multiplayer_authority()
@@ -368,7 +378,8 @@ func _ready():
 	platform = OS.get_name()
 	match platform:
 		"Windows", "macOS", "Linux":
-			print("Працює на десктопі: ", platform)
+			#print("Працює на десктопі: ", platform)
+			pass
 		"Android", "iOS":
 			print("Працює на мобільному пристрої: ", platform)
 			platform = "mobile"
@@ -401,8 +412,7 @@ func _unhandled_input(e):
 						rpc_id(1, "server_use_item",get_curItem(), {"origin":Cam.global_transform.origin, "direction":-Cam.global_transform.basis.z+Vector3(0,0,0)}, "right")
 				elif cast and !is_full(cast.weight) and cast.canBeTaken:
 					add_to_inv(cast)
-					await get_tree().process_frame
-					set_cur_item(actCell)
+					#await get_tree().process_frame
 					#print("In[uted]")
 		elif e is InputEventMouseMotion:
 			rotate_y(-e.relative.x * SENSIVITY * sensivity)
@@ -444,19 +454,15 @@ func _physics_process(delta):
 		if !is_empty():
 			if Input.is_action_just_pressed("1_gun"):
 				actCell = 0
-				#rpc("set_cur_item", actCell)
 				set_cur_item(actCell)
 			elif Input.is_action_just_pressed("2_gun"):
 				actCell = 1
-				#rpc("set_cur_item", actCell)
 				set_cur_item(actCell)
 			elif Input.is_action_just_pressed("3_gun"):
 				actCell = 2
-				#rpc("set_cur_item", actCell)
 				set_cur_item(actCell)
 			elif Input.is_action_just_pressed("4_gun"):
 				actCell = 3
-				#rpc("set_cur_item", actCell)
 				set_cur_item(actCell)
 			
 		
